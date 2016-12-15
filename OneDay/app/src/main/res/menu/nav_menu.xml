@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/item1"
+            android:icon="@mipmap/ic_history"
+            android:title="@string/lishi"
+            >
+        </item>
+        <item android:id="@+id/item2"
+            android:icon="@mipmap/icon_gril"
+            android:title="@string/meizhi"
+            >
+        </item>
+        <item android:id="@+id/item3"
+            android:icon="@mipmap/ic_toolbar_like_n"
+            android:title="@string/soucang"
+            >
+        </item>
+        <item android:id="@+id/item4"
+            android:icon="@mipmap/ic_about"
+            android:title="@string/guanyu"
+            >
+        </item>
+
+    </group>
+
+</menu>
