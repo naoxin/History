@@ -1,5 +1,7 @@
 package com.result.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -66,6 +68,9 @@ public class PagerActivity extends AppCompatActivity {
         transaction = manager.beginTransaction();
         manager.beginTransaction().add(R.id.frame,historyFragment).commit();
         navigationView = (NavigationView) findViewById(R.id.nav);
+        //菜单默认选中
+        navigationView.setCheckedItem(R.id.item1);
+        //侧滑菜单点击事件
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -93,5 +98,26 @@ public class PagerActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+    //窗口判断是否退出
+    public void onBackPressed() {
+        new AlertDialog.Builder(this).setTitle("确认退出吗？")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击“确认”后的操作
+                        PagerActivity.this.finish();
+
+                    }
+                })
+                .setNegativeButton("返回", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击“返回”后的操作,这里不设置没有任何操作
+                    }
+                }).show();
     }
 }

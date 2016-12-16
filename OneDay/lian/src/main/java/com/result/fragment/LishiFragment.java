@@ -1,12 +1,15 @@
 package com.result.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.result.lian.Main2Activity;
 import com.result.lian.R;
 
 /**
@@ -16,9 +19,21 @@ import com.result.lian.R;
  */
 
 public class LishiFragment extends Fragment {
+
+    private FloatingActionButton mFloatingActionButton;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return View.inflate(getActivity(), R.layout.lishi,null);
+        View view=View.inflate(getActivity(), R.layout.lishi,null);
+        mFloatingActionButton =(FloatingActionButton)view.findViewById(R.id.FloatingActionButton);
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), Main2Activity.class));
+            }
+        });
+
+        return view;
     }
 }
