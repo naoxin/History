@@ -1,5 +1,6 @@
 package com.result.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -19,6 +20,7 @@ public class DetailsActivity extends AppCompatActivity {
     private Toolbar des;
     private AppBarLayout app_ba;
     private FloatingActionButton mDetails_FloatingActionButton;
+    private String tg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,9 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
         EventBus.getDefault().register(this);
         des = (Toolbar) findViewById(R.id.desinn);
+        Intent intent=getIntent();
+        String title=intent.getStringExtra("nihao");
+        des.setTitle(title);
         des.setTitleTextColor(Color.WHITE);//设置ToolBar的titl颜色
         setSupportActionBar(des);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -51,10 +56,30 @@ public class DetailsActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
+
+
+//    @Subscribe(sticky = true)
+//    public void onEventMainThread(FirstEvent event) {
+//        tg = event.getMsg().get(0).getTitle();
+//        des.setTitle(tg);
+//        des.setTitleTextColor(Color.WHITE);//设置ToolBar的titl颜色
+//        setSupportActionBar(des);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        //设置点击返回小箭头
+//        des.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                finish();
+//            }
+//        });
+//        Log.d("harvic", "onEventMainThread收到了消息：++++++++++++++++++++++++++++++++++++++++" + event.getMsg());
+//    }
+
     @Subscribe(sticky = true)
-    public void onEventMainThread(FirstEvent event) {
-        String tg=event.getMsg().get(0).getTitle();
+    public void handleEvent(FirstEvent event) {
+        tg = event.getMsg().get(0).getTitle();
         des.setTitle(tg);
         des.setTitleTextColor(Color.WHITE);//设置ToolBar的titl颜色
         setSupportActionBar(des);

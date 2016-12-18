@@ -50,6 +50,7 @@ public class HistoryFragment extends Fragment {
     String path = "http://api.juheapi.com/japi/toh?key=69a7eeba7869f8bdcdee7b2bc3bb5aa2&v=1.0&month=11&day=1";
     private List<Date.ResultBean> result1;
     HomeAdapter mAdapter;
+    private String title;
 
 
     @Nullable
@@ -77,9 +78,10 @@ public class HistoryFragment extends Fragment {
                 new RecyclerViewClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(final View view, final int position) {
-                        startActivity(new Intent(getActivity(), DetailsActivity.class));
+                        startActivity(new Intent(getActivity(), DetailsActivity.class).putExtra(title, "nihao"));
                         EventBus.getDefault().post(new FirstEvent(result1));
-                        Toast.makeText(getActivity(), result1.get(position)+"长按", Toast.LENGTH_SHORT).show();
+                        EventBus.getDefault().postSticky(new FirstEvent(result1));
+                        Toast.makeText(getActivity(), result1.get(position).getYear() + "长按", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -110,7 +112,7 @@ public class HistoryFragment extends Fragment {
 
 
     public void request() {
-        OKHttp.getAsync(path,  new OKHttp.DataCallBack() {
+        OKHttp.getAsync(path, new OKHttp.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
 
@@ -121,10 +123,12 @@ public class HistoryFragment extends Fragment {
                 Gson gson = new Gson();
                 Date date = gson.fromJson(result, Date.class);
                 result1 = date.getResult();
+                title = result1.get(0).getTitle();
                 mRecyclerView.setAdapter(mAdapter = new HomeAdapter());
             }
         });
     }
+
     class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder> {
 
 
@@ -140,7 +144,7 @@ public class HistoryFragment extends Fragment {
         public void onBindViewHolder(HomeAdapter.MyViewHolder holder, int position) {
 
             holder.te.setText(result1.get(position).getTitle());
-            holder.te2.setText(result1.get(position).getYear()+"年12月16日");
+            holder.te2.setText(result1.get(position).getYear() + "年12月16日");
         }
 
         @Override
@@ -161,9 +165,9 @@ public class HistoryFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);//反注册，也就是取消该事件
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().post(new FirstEvent(result1));
     }
 }
 
