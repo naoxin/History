@@ -2,7 +2,6 @@ package com.result.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -11,10 +10,11 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,11 +29,15 @@ import com.result.bean.OKHttp;
 import com.result.bean.RecyclerViewClickListener;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.Request;
+
+import static com.result.activity.R.id.xiangyou1;
+import static com.result.activity.R.id.xiangzuo1;
 
 /**
  * 1.作用
@@ -47,23 +51,28 @@ public class HistoryFragment extends Fragment {
     private FloatingActionButton mFloatingActionButton;
     private SwipeRefreshLayout mSwipe;
     private RecyclerView mRecyclerView;
-    String path = "http://api.juheapi.com/japi/toh?key=69a7eeba7869f8bdcdee7b2bc3bb5aa2&v=1.0&month=11&day=1";
-    private List<Date.ResultBean> result1;
+    String path = "http://v.juhe.cn/todayOnhistory/queryEvent.php?key=69a7eeba7869f8bdcdee7b2bc3bb5aa2&date=";
+
     HomeAdapter mAdapter;
-    private String title;
+    private View view;
+    private ImageView xiangzuo;
+    private TextView data;
+    private ImageView xiangyou;
+    private SimpleDateFormat dateFormat;
+    private Calendar mCalendar = Calendar.getInstance();//使用默认时区和语言环境获得一个日历。
+    private List<Date.ResultBean> result1;
+    private int month;
+    private int day;
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = View.inflate(getActivity(), R.layout.history_fragment, null);
+        view = View.inflate(getActivity(), R.layout.history_fragment, null);
 
-        request();
+        initView();
         mActivity = getActivity();
         mPagerActivity = (PagerActivity) mActivity;
-        Toolbar mToolbar = (Toolbar) view.findViewById(R.id.toolBar);
-        mToolbar.setTitleTextColor(Color.WHITE);//设置ToolBar的titl颜色
-        mPagerActivity.setSupportActionBar(mToolbar);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         //卡片布局
@@ -71,17 +80,13 @@ public class HistoryFragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        List<Date> datas = new ArrayList<Date>();
-        //mRecyclerView点击时间
-//        mRecyclerView.setAdapter(new MyRecyclerViewAdapter(getActivity(), datas));
+        //mRecyclerView点击事件
         mRecyclerView.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), mRecyclerView,
                 new RecyclerViewClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(final View view, final int position) {
-                        startActivity(new Intent(getActivity(), DetailsActivity.class).putExtra(title, "nihao"));
-                        EventBus.getDefault().post(new FirstEvent(result1));
-                        EventBus.getDefault().postSticky(new FirstEvent(result1));
-                        Toast.makeText(getActivity(), result1.get(position).getYear() + "长按", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(getActivity(), DetailsActivity.class));
+                        EventBus.getDefault().postSticky(new FirstEvent(result1.get(position).getE_id()));
                     }
 
                     @Override
@@ -103,16 +108,58 @@ public class HistoryFragment extends Fragment {
             @Override
             public void onRefresh() {
                 request();
-                ;
-                mRecyclerView.setAdapter(mAdapter = new HomeAdapter());
+                mSwipe.setRefreshing(false);
+                mRecyclerView.setAdapter(mAdapter = new HomeAdapter(result1));
             }
         });
         return view;
     }
 
+    private void initView() {
+
+        //得到日期调整控件
+        xiangzuo = (ImageView) view.findViewById(xiangzuo1);
+        data = (TextView) view.findViewById(R.id.data);
+        xiangyou = (ImageView) view.findViewById(xiangyou1);
+
+        //改变日期方法
+        changeDate(mCalendar);
+
+        //设置箭头监听
+        xiangzuo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //取当前日期的前一天.
+                mCalendar.add(Calendar.DAY_OF_MONTH, -1);
+                changeDate(mCalendar);
+//                notifyAll();
+            }
+        });
+        xiangyou.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //取当前日期的前一天.
+                mCalendar.add(Calendar.DAY_OF_MONTH, +1);
+                changeDate(mCalendar);
+            }
+        });
+    }
+
+    private void changeDate(Calendar mCalendar) {
+        //格式化日期
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        data.setText(dateFormat.format(mCalendar.getTime()));
+        //获取月份，0表示1月份
+        month = mCalendar.get(Calendar.MONTH) + 1;
+        day = mCalendar.get(Calendar.DAY_OF_MONTH);
+        Log.d("Data", month + day + "***999999999999");
+        Toast.makeText(getActivity(), month + "月" + day + "日", Toast.LENGTH_SHORT).show();
+        request();
+    }
+
 
     public void request() {
-        OKHttp.getAsync(path, new OKHttp.DataCallBack() {
+        OKHttp.getAsync(path+month+"/"+day, new OKHttp.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
 
@@ -123,14 +170,18 @@ public class HistoryFragment extends Fragment {
                 Gson gson = new Gson();
                 Date date = gson.fromJson(result, Date.class);
                 result1 = date.getResult();
-                title = result1.get(0).getTitle();
-                mRecyclerView.setAdapter(mAdapter = new HomeAdapter());
+                mRecyclerView.setAdapter(new HomeAdapter(result1));
             }
         });
     }
 
     class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder> {
 
+        private List<Date.ResultBean> result1;
+
+        public HomeAdapter(List<Date.ResultBean> result1) {
+            this.result1 = result1;
+        }
 
         @Override
         public HomeAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -144,7 +195,7 @@ public class HistoryFragment extends Fragment {
         public void onBindViewHolder(HomeAdapter.MyViewHolder holder, int position) {
 
             holder.te.setText(result1.get(position).getTitle());
-            holder.te2.setText(result1.get(position).getYear() + "年12月16日");
+            holder.te2.setText(result1.get(position).getDate());
         }
 
         @Override
@@ -163,11 +214,10 @@ public class HistoryFragment extends Fragment {
             }
         }
     }
-
     @Override
     public void onStop() {
         super.onStop();
-        EventBus.getDefault().post(new FirstEvent(result1));
+//        EventBus.getDefault().post(new FirstEvent(getActivity()));
     }
 }
 

@@ -1,9 +1,11 @@
 package com.result.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,16 +13,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
+import com.result.activity.Details_GileActivity;
 import com.result.activity.R;
 import com.result.bean.Gril;
+import com.result.bean.GrilFirstEvent;
 import com.result.bean.OKHttp;
+import com.result.bean.RecyclerViewClickListener;
 
 import java.io.IOException;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
 import okhttp3.Request;
 
 /**
@@ -36,6 +43,7 @@ public class GirlFragment extends Fragment {
     String pa="http://gank.io/api/data/%E7%A6%8F%E5%88%A9/16/1";
     private List<Gril.ResultsBean> url;
     GirlFragment.HomeAdapter mAdapter;
+    private SwipeRefreshLayout gril_mSwipeRefreshLayout;
 
     @Nullable
     @Override
@@ -45,11 +53,35 @@ public class GirlFragment extends Fragment {
         recy =(RecyclerView)view.findViewById(R.id.re);
         recy.setLayoutManager(new GridLayoutManager(getActivity(),2));
 
+        recy.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), recy,
+                new RecyclerViewClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(final View view, final int position) {
+                        startActivity(new Intent(getActivity(), Details_GileActivity.class));
+                        EventBus.getDefault().postSticky( new GrilFirstEvent(url.get(position).getUrl()));
+                    }
+
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        Toast.makeText(getActivity(), "长按", Toast.LENGTH_SHORT).show();
+                    }
+                }));
+
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.girlFloatingActionButton);
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
+            }
+        });
+
+        gril_mSwipeRefreshLayout =(SwipeRefreshLayout)view.findViewById(R.id.gril_mSwipeRefreshLayout);
+        gril_mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                request();
+                gril_mSwipeRefreshLayout.setRefreshing(false);
+                recy.setAdapter(mAdapter = new GirlFragment.HomeAdapter());
             }
         });
         return view;

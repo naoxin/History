@@ -1,7 +1,5 @@
 package com.result.bean;
 
-import java.util.List;
-
 /**
  * 1.作用
  * 2.作者：李延
@@ -9,12 +7,13 @@ import java.util.List;
  */
 
 public class FirstEvent {
-    private List<Date.ResultBean> mMsg;
-    public FirstEvent(List<Date.ResultBean> msg) {
-        // TODO Auto-generated constructor stub
-        mMsg = msg;
+   private String e_id;
+
+    public FirstEvent(String e_id) {
+        this.e_id = e_id;
     }
-    public List<Date.ResultBean> getMsg(){
-        return mMsg;
+
+    public String getE_id() {
+        return e_id;
     }
 }

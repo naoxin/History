@@ -1,13 +1,63 @@
 package com.result.activity;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class CalendarActivity extends AppCompatActivity {
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+import static com.result.activity.R.id.textView;
+
+
+public class CalendarActivity extends AppCompatActivity implements OnDateSelectedListener, OnMonthChangedListener {
+
+    private static final DateFormat FORMATTER = SimpleDateFormat.getDateInstance();
+    private TextView text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+
+        text = (TextView) findViewById(textView);
+
+        final MaterialCalendarView widget = (MaterialCalendarView) findViewById(R.id.calendarView);
+        //设置点击选择日期改变事件
+        widget.setOnDateChangedListener(this);
+        //设置滑动选择改变月份事件
+        widget.setOnMonthChangedListener(this);
+
+        //点击文本内容清除之前的选择
+        text.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                widget.clearSelection();
+            }
+        });
+
+    }
+
+    @Override
+    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+        if(date == null) {
+            text.setText(null);
+        }
+        else {
+            text.setText(FORMATTER.format(date.getDate()));
+        }
+    }
+
+    @Override
+    public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
+        Toast.makeText(this, FORMATTER.format(date.getDate()), Toast.LENGTH_SHORT).show();
     }
 }

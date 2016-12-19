@@ -5,12 +5,18 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/re"
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/gril_mSwipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        ></android.support.v7.widget.RecyclerView>
-
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/re"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            ></android.support.v7.widget.RecyclerView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/girlFloatingActionButton"
@@ -19,5 +25,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="20dp"/>
+
 
 </android.support.design.widget.CoordinatorLayout>
