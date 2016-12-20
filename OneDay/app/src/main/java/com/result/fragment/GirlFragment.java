@@ -1,6 +1,10 @@
 package com.result.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -40,54 +44,93 @@ public class GirlFragment extends Fragment {
 
     private FloatingActionButton mFloatingActionButton;
     private RecyclerView recy;
-    String pa="http://gank.io/api/data/%E7%A6%8F%E5%88%A9/16/1";
+    int a = 1;
+    String pa = "http://gank.io/api/data/%E7%A6%8F%E5%88%A9/30/";
     private List<Gril.ResultsBean> url;
     GirlFragment.HomeAdapter mAdapter;
     private SwipeRefreshLayout gril_mSwipeRefreshLayout;
+    private View view;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view=View.inflate(getActivity(), R.layout.girl_fragment,null);
-        request();
-        recy =(RecyclerView)view.findViewById(R.id.re);
-        recy.setLayoutManager(new GridLayoutManager(getActivity(),2));
 
-        recy.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), recy,
-                new RecyclerViewClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(final View view, final int position) {
-                        startActivity(new Intent(getActivity(), Details_GileActivity.class));
-                        EventBus.getDefault().postSticky( new GrilFirstEvent(url.get(position).getUrl()));
+
+        if (isNetworkAvailable(getActivity()))
+        {
+            view = View.inflate(getActivity(), R.layout.girl_fragment, null);
+            request();
+            recy = (RecyclerView) view.findViewById(R.id.re);
+            recy.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+
+            recy.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), recy,
+                    new RecyclerViewClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(final View view, final int position) {
+                            startActivity(new Intent(getActivity(), Details_GileActivity.class));
+                            EventBus.getDefault().postSticky(new GrilFirstEvent(url.get(position).getUrl()));
+                        }
+
+                        @Override
+                        public void onItemLongClick(View view, int position) {
+                            Toast.makeText(getActivity(), "长按", Toast.LENGTH_SHORT).show();
+                        }
+                    }));
+
+            mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.girlFloatingActionButton);
+            mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recy.smoothScrollToPosition(0);
+
+                }
+            });
+
+            gril_mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.gril_mSwipeRefreshLayout);
+            gril_mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    request();
+                    gril_mSwipeRefreshLayout.setRefreshing(false);
+                    recy.setAdapter(mAdapter = new GirlFragment.HomeAdapter());
+                }
+            });
+            recy.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if (isSlideToBottom(recy)) {
+                        Toast.makeText(getActivity(), "滑到底部了", Toast.LENGTH_SHORT).show();
+                        a++;
+                        request();
                     }
+                }
+            });
+        }
+        else
+        {
+            view = View.inflate(getActivity(), R.layout.girl_fragment2, null);
+        }
 
-                    @Override
-                    public void onItemLongClick(View view, int position) {
-                        Toast.makeText(getActivity(), "长按", Toast.LENGTH_SHORT).show();
-                    }
-                }));
 
-        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.girlFloatingActionButton);
-        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-            }
-        });
-
-        gril_mSwipeRefreshLayout =(SwipeRefreshLayout)view.findViewById(R.id.gril_mSwipeRefreshLayout);
-        gril_mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                request();
-                gril_mSwipeRefreshLayout.setRefreshing(false);
-                recy.setAdapter(mAdapter = new GirlFragment.HomeAdapter());
-            }
-        });
         return view;
     }
+
+    protected boolean isSlideToBottom(RecyclerView recyclerView) {
+        if (recy == null) return false;
+        if (recy.computeVerticalScrollExtent() + recy.computeVerticalScrollOffset() >= recy.computeVerticalScrollRange())
+            return true;
+        return false;
+    }
+
     public void request() {
-        OKHttp.getAsync(pa,  new OKHttp.DataCallBack() {
+        OKHttp.getAsync(pa + a, new OKHttp.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
 
@@ -95,14 +138,15 @@ public class GirlFragment extends Fragment {
 
             @Override
             public void requestSuccess(String result) throws Exception {
-                Log.e("TAG", "requestSuccess:+++++++++++++++++++++++++++++ "+result);
+                Log.e("TAG", "requestSuccess:+++++++++++++++++++++++++++++ " + result);
                 Gson gson = new Gson();
-                Gril gril=gson.fromJson(result,Gril.class);
-                url =gril.getResults();
+                Gril gril = gson.fromJson(result, Gril.class);
+                url = gril.getResults();
                 recy.setAdapter(mAdapter = new GirlFragment.HomeAdapter());
             }
         });
     }
+
     class HomeAdapter extends RecyclerView.Adapter<GirlFragment.HomeAdapter.MyViewHolder> {
 
 
@@ -125,12 +169,43 @@ public class GirlFragment extends Fragment {
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
 
-            private  ImageView im;
+            private ImageView im;
 
             public MyViewHolder(View itemView) {
                 super(itemView);
-                im =(ImageView)itemView.findViewById(R.id.im);
+                im = (ImageView) itemView.findViewById(R.id.im);
             }
         }
+    }
+    public boolean isNetworkAvailable(Activity activity)
+    {
+        Context context = activity.getApplicationContext();
+        // 获取手机所有连接管理对象（包括对wi-fi,net等连接的管理）
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager == null)
+        {
+            return false;
+        }
+        else
+        {
+            // 获取NetworkInfo对象
+            NetworkInfo[] networkInfo = connectivityManager.getAllNetworkInfo();
+
+            if (networkInfo != null && networkInfo.length > 0)
+            {
+                for (int i = 0; i < networkInfo.length; i++)
+                {
+                    System.out.println(i + "===状态===" + networkInfo[i].getState());
+                    System.out.println(i + "===类型===" + networkInfo[i].getTypeName());
+                    // 判断当前网络状态是否为连接状态
+                    if (networkInfo[i].getState() == NetworkInfo.State.CONNECTED)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

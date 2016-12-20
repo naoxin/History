@@ -1,7 +1,10 @@
 package com.result.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -25,6 +28,7 @@ import com.result.activity.PagerActivity;
 import com.result.activity.R;
 import com.result.bean.Date;
 import com.result.bean.FirstEvent;
+import com.result.bean.FirstEvent_Rili;
 import com.result.bean.OKHttp;
 import com.result.bean.RecyclerViewClickListener;
 
@@ -34,6 +38,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Request;
 
 import static com.result.activity.R.id.xiangyou1;
@@ -68,52 +73,66 @@ public class HistoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = View.inflate(getActivity(), R.layout.history_fragment, null);
+        if (isNetworkAvailable(getActivity()))
+        {
+            view = View.inflate(getActivity(), R.layout.history_fragment, null);
+            initView();
+            mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            //卡片布局
+            //mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            //mRecyclerView点击事件
+            mRecyclerView.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), mRecyclerView,
+                    new RecyclerViewClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(final View view, final int position) {
+                            startActivity(new Intent(getActivity(), DetailsActivity.class));
+                            EventBus.getDefault().postSticky(new FirstEvent(result1.get(position).getE_id()));
+                        }
 
-        initView();
-        mActivity = getActivity();
-        mPagerActivity = (PagerActivity) mActivity;
-
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        //卡片布局
-        //mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        //mRecyclerView点击事件
-        mRecyclerView.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), mRecyclerView,
-                new RecyclerViewClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(final View view, final int position) {
-                        startActivity(new Intent(getActivity(), DetailsActivity.class));
-                        EventBus.getDefault().postSticky(new FirstEvent(result1.get(position).getE_id()));
-                    }
-
-                    @Override
-                    public void onItemLongClick(View view, int position) {
-                        Toast.makeText(getActivity(), "长按", Toast.LENGTH_SHORT).show();
-                    }
-                }));
-        //点击跳转日历图标
-        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.FloatingActionButton);
-        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(getActivity(), CalendarActivity.class));
-            }
-        });
+                        @Override
+                        public void onItemLongClick(View view, int position) {
+                            Toast.makeText(getActivity(), "长按", Toast.LENGTH_SHORT).show();
+                        }
+                    }));
+            //点击跳转日历图标
+            mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.FloatingActionButton);
+            mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(getActivity(), CalendarActivity.class));
+                }
+            });
 //mRecyclerView的下拉刷新
-        mSwipe = (SwipeRefreshLayout) view.findViewById(R.id.mSwipeRefreshLayout);
-        mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                request();
-                mSwipe.setRefreshing(false);
-                mRecyclerView.setAdapter(mAdapter = new HomeAdapter(result1));
-            }
-        });
+            mSwipe = (SwipeRefreshLayout) view.findViewById(R.id.mSwipeRefreshLayout);
+            mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    request(month,day);
+                    mSwipe.setRefreshing(false);
+                    mRecyclerView.setAdapter(mAdapter = new HomeAdapter(result1));
+                }
+            });
+
+            EventBus.getDefault().register(this);
+        }
+        else
+        {
+            view = View.inflate(getActivity(), R.layout.history_freagment2, null);
+        }
+
+
+
+
+
+
+
         return view;
     }
+
+
+
 
     private void initView() {
 
@@ -154,11 +173,12 @@ public class HistoryFragment extends Fragment {
         day = mCalendar.get(Calendar.DAY_OF_MONTH);
         Log.d("Data", month + day + "***999999999999");
         Toast.makeText(getActivity(), month + "月" + day + "日", Toast.LENGTH_SHORT).show();
-        request();
+        request(month,day);
+
     }
 
 
-    public void request() {
+    public void request(int month,int day) {
         OKHttp.getAsync(path+month+"/"+day, new OKHttp.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
@@ -214,10 +234,51 @@ public class HistoryFragment extends Fragment {
             }
         }
     }
+    @Subscribe(sticky = true)
+    public void onEventMainThread(FirstEvent_Rili event) {
+        month = event.getYear();
+        day = event.getDay();
+//        month=+1;
+        data.setText("2016" + "-"+(month+1) + "-" +day );
+        request(month+1,day);
+    }
+
     @Override
-    public void onStop() {
-        super.onStop();
-//        EventBus.getDefault().post(new FirstEvent(getActivity()));
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);//反注册EventBus
+    }
+
+    public boolean isNetworkAvailable(Activity activity)
+    {
+        Context context = activity.getApplicationContext();
+        // 获取手机所有连接管理对象（包括对wi-fi,net等连接的管理）
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager == null)
+        {
+            return false;
+        }
+        else
+        {
+            // 获取NetworkInfo对象
+            NetworkInfo[] networkInfo = connectivityManager.getAllNetworkInfo();
+
+            if (networkInfo != null && networkInfo.length > 0)
+            {
+                for (int i = 0; i < networkInfo.length; i++)
+                {
+                    System.out.println(i + "===状态===" + networkInfo[i].getState());
+                    System.out.println(i + "===类型===" + networkInfo[i].getTypeName());
+                    // 判断当前网络状态是否为连接状态
+                    if (networkInfo[i].getState() == NetworkInfo.State.CONNECTED)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
 

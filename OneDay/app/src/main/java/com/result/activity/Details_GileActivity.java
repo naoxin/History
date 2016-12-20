@@ -37,6 +37,7 @@ public class Details_GileActivity extends AppCompatActivity {
             }
         });
         grilim =(ImageView)findViewById(R.id.gril_im);
+
         EventBus.getDefault().register(this);
     }
     @Subscribe(sticky = true)
@@ -51,4 +52,5 @@ public class Details_GileActivity extends AppCompatActivity {
         super.onDestroy();
         EventBus.getDefault().unregister(this);//反注册EventBus
     }
+
 }

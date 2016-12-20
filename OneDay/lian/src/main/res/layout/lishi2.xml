@@ -2,21 +2,22 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ff0">
+    android:background="@mipmap/ic_launcher"
+    >
 
->
-        <com.result.fragment.MyZoomImageView
-            android:id="@+id/im"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@mipmap/ic_launcher"/>
+
+        <TextView
+            android:text="当前没有网络"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/FloatingActionButton"
             android:src="@mipmap/ic_calender"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|bottom"
-            android:layout_width="wrap_content"
             android:layout_margin="20dp"/>
 
 
