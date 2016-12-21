@@ -3,11 +3,12 @@ package com.result.view;
 import android.content.Context;
 import android.util.TypedValue;
 
-/*
- * 常用单位转换工具类
- *
- * @author  RaphetS
- * */
+/**
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 日常字体转换
+ */
 public class DanweiUtil {
 
     /**

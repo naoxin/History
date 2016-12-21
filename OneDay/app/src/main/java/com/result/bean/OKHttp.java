@@ -20,9 +20,10 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * 1.作用：okhttp工具类
- * 2.作者：李延
- * 3.时间：2016、11、24
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 网络请求工具类
  */
 
 public class OKHttp {

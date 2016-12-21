@@ -1,9 +1,10 @@
 package com.result.bean;
 
 /**
- * 1.作用
- * 2.作者：李延
- * 3.时间：2016、11、24
+ * autour: 李延
+ * date: 2016/12/21 20:33
+ * update: 2016/12/21
+ * Eventbus传值历史id传值bean
  */
 
 public class FirstEvent {

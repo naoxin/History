@@ -9,7 +9,12 @@ import android.view.ViewGroup;
 
 import com.result.activity.R;
 
-
+/**
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 关于页面
+ */
 public class AboutFragment extends Fragment{
     @Nullable
     @Override

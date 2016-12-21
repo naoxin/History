@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.result.bean.Details;
 import com.result.bean.FirstEvent;
 import com.result.bean.OKHttp;
+import com.result.dao.ScUser;
 import com.result.dao.ScUserDao;
 
 import java.io.IOException;
@@ -27,7 +28,12 @@ import de.greenrobot.event.Subscribe;
 import okhttp3.Request;
 
 import static com.result.activity.R.id.Details_FloatingActionButton;
-
+/**
+ * autour: 李延
+ * date: 2016/12/21 20:33
+ * update: 2016/12/21
+ * 历史详情页面
+ */
 public class DetailsActivity extends AppCompatActivity {
 
     private Toolbar des;
@@ -35,18 +41,23 @@ public class DetailsActivity extends AppCompatActivity {
     private FloatingActionButton mDetails_FloatingActionButton;
     private ImageView deim;
     private TextView detetit;
-    private String idmMsg ;
+    private String idmMsg;
     String pp = "http://v.juhe.cn/todayOnhistory/queryDetail.php?key=69a7eeba7869f8bdcdee7b2bc3bb5aa2&e_id=";
     private List<Details.ResultBean> content;
     private String title;
     private String con;
     private String picurl;
     private ScUserDao dao;
+    private String e_id;
+    private boolean ishave;
+    private ScUser user;
+    private List<ScUser> lis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        user = new ScUser();
         dao = new ScUserDao(DetailsActivity.this);
 
         des = (Toolbar) findViewById(R.id.desinn);
@@ -59,12 +70,7 @@ public class DetailsActivity extends AppCompatActivity {
         des.setTitleTextColor(Color.WHITE);//设置ToolBar的titl颜色
 
         //设置点击返回小箭头
-        des.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DetailsActivity.this.finish();
-            }
-        });
+
         //设置收藏按钮显示/隐藏
         mDetails_FloatingActionButton = (FloatingActionButton) findViewById(Details_FloatingActionButton);
         app_ba = (AppBarLayout) findViewById(R.id.app_bar);
@@ -84,16 +90,37 @@ public class DetailsActivity extends AppCompatActivity {
         mDetails_FloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(DetailsActivity.this, "收藏", Toast.LENGTH_SHORT).show();
-                dao.insert(title,con,picurl);
+
+                ishave = !ishave;
+                if (ishave) {
+                    if (title == " ") {
+                        Toast.makeText(DetailsActivity.this, "不能收藏", Toast.LENGTH_SHORT).show();
+                    } else {
+                        try {
+                            dao.insert(title, con, picurl, e_id);
+                            mDetails_FloatingActionButton.setImageResource(R.mipmap.ic_toolbar_like_p);
+                            Toast.makeText(DetailsActivity.this, "收藏", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            Toast.makeText(DetailsActivity.this, "不能收藏", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+
+
+                } else {
+                    dao.delete(idmMsg);
+                    mDetails_FloatingActionButton.setImageResource(R.mipmap.ic_toolbar_like_n);
+                    Toast.makeText(DetailsActivity.this, "删除收藏", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+
 
     }
 
     public void qing() {
-        Log.d("TAG", "requestSuccess: +++++++++++++++++++++++++++++++++"+pp+idmMsg);
-        OKHttp.getAsync(pp+idmMsg, new OKHttp.DataCallBack() {
+        Log.d("TAG", "requestSuccess: +++++++++++++++++++++++++++++++++" + pp + idmMsg);
+        OKHttp.getAsync(pp + idmMsg, new OKHttp.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
 
@@ -104,14 +131,21 @@ public class DetailsActivity extends AppCompatActivity {
                 Gson gson = new Gson();
                 Details details = gson.fromJson(result, Details.class);
                 content = details.getResult();
-                title =content.get(0).getTitle();
+                e_id = content.get(0).getE_id();
+                title = content.get(0).getTitle();
                 des.setTitle(title);
                 setSupportActionBar(des);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                con =content.get(0).getContent();
+                des.setNavigationOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        finish();
+                    }
+                });
+                con = content.get(0).getContent();
                 detetit.setText(con);
-                Log.d("TAG", "requestSuccess: +++++++++++++++++++++++++++++++++"+content.get(0).getTitle());
-                picurl =content.get(0).getPicUrl().get(0).getUrl();
+                Log.d("TAG", "requestSuccess: +++++++++++++++++++++++++++++++++" + content.get(0).getTitle());
+                picurl = content.get(0).getPicUrl().get(0).getUrl();
                 Glide.with(DetailsActivity.this).load(picurl).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(deim);
             }
         });
@@ -120,7 +154,6 @@ public class DetailsActivity extends AppCompatActivity {
     @Subscribe(sticky = true)
     public void onEventMainThread(FirstEvent event) {
         idmMsg = event.getE_id();
-       // Glide.with(this).load(imMsg).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(deim);
 
     }
 
@@ -133,5 +166,11 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        ishave = dao.isHaveid(idmMsg);
+        if (ishave) {
+            mDetails_FloatingActionButton.setImageResource(R.mipmap.ic_toolbar_like_p);
+        } else {
+            mDetails_FloatingActionButton.setImageResource(R.mipmap.ic_toolbar_like_n);
+        }
     }
 }

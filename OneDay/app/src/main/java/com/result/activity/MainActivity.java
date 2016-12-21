@@ -6,7 +6,12 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-
+/**
+ * autour: 李延
+ * date: 2016/12/21 20:33
+ * update: 2016/12/21
+ * 导航页
+ */
 public class MainActivity extends AppCompatActivity {
 
     private TextView tv;

@@ -1,11 +1,25 @@
 package com.result.dao;
 
-
+/**
+ * autour: 李延
+ * date: 2016/12/21 20:33 
+ * update: 2016/12/21
+ * 数据库bean类
+ */
 public class ScUser {
     private int id;
     private String data;
     private String title;
     private String image;
+    private String e_id;
+
+    public ScUser(int id, String data, String title, String image, String e_id) {
+        this.id = id;
+        this.data = data;
+        this.title = title;
+        this.image = image;
+        this.e_id = e_id;
+    }
 
     public int getId() {
         return id;
@@ -39,15 +53,15 @@ public class ScUser {
         this.image = image;
     }
 
-    public ScUser(int id, String data, String title, String image) {
-        this.id = id;
-        this.data = data;
-        this.title = title;
-        this.image = image;
+    public String getE_id() {
+        return e_id;
+    }
+
+    public void setE_id(String e_id) {
+        this.e_id = e_id;
     }
 
     public ScUser() {
-        super();
     }
 
     @Override
@@ -57,6 +71,7 @@ public class ScUser {
                 ", data='" + data + '\'' +
                 ", title='" + title + '\'' +
                 ", image='" + image + '\'' +
+                ", e_id='" + e_id + '\'' +
                 '}';
     }
 }

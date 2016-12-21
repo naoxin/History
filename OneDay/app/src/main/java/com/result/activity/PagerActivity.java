@@ -21,7 +21,12 @@ import com.result.fragment.AboutFragment;
 import com.result.fragment.CollectionFragment;
 import com.result.fragment.GirlFragment;
 import com.result.fragment.HistoryFragment;
-
+/**
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 历史首页面
+ */
 public class PagerActivity extends AppCompatActivity {
 
     private Toolbar toolbar;

@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -14,11 +13,18 @@ import com.result.bean.GrilFirstEvent;
 
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
+import uk.co.senab.photoview.PhotoView;
 
+/**
+ * autour: 李延
+ * date: 2016/12/21 20:33
+ * update: 2016/12/21
+ * 妹纸详情页面
+ */
 public class Details_GileActivity extends AppCompatActivity {
 
     private Toolbar griltoo;
-    private ImageView grilim;
+    private PhotoView grilim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +42,7 @@ public class Details_GileActivity extends AppCompatActivity {
                 finish();
             }
         });
-        grilim =(ImageView)findViewById(R.id.gril_im);
+        grilim =(PhotoView)findViewById(R.id.gril_im);
 
         EventBus.getDefault().register(this);
     }

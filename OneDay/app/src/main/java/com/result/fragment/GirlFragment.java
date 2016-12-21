@@ -29,15 +29,18 @@ import com.result.bean.OKHttp;
 import com.result.bean.RecyclerViewClickListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.Request;
 
+
 /**
- * 1.作用
- * 2.作者：李延
- * 3.时间：2016、11、24
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 妹纸页面
  */
 
 public class GirlFragment extends Fragment {
@@ -45,11 +48,13 @@ public class GirlFragment extends Fragment {
     private FloatingActionButton mFloatingActionButton;
     private RecyclerView recy;
     int a = 1;
-    String pa = "http://gank.io/api/data/%E7%A6%8F%E5%88%A9/30/";
+    String pa = "http://gank.io/api/data/%E7%A6%8F%E5%88%A9/16/";
     private List<Gril.ResultsBean> url;
     GirlFragment.HomeAdapter mAdapter;
     private SwipeRefreshLayout gril_mSwipeRefreshLayout;
     private View view;
+    private boolean isFirst=true;
+    private List<Gril.ResultsBean> urls=new ArrayList<Gril.ResultsBean>();
 
     @Nullable
     @Override
@@ -59,24 +64,10 @@ public class GirlFragment extends Fragment {
         if (isNetworkAvailable(getActivity()))
         {
             view = View.inflate(getActivity(), R.layout.girl_fragment, null);
-            request();
+            request(a,isFirst);
             recy = (RecyclerView) view.findViewById(R.id.re);
-            recy.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-
-            recy.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), recy,
-                    new RecyclerViewClickListener.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(final View view, final int position) {
-                            startActivity(new Intent(getActivity(), Details_GileActivity.class));
-                            EventBus.getDefault().postSticky(new GrilFirstEvent(url.get(position).getUrl()));
-                        }
-
-                        @Override
-                        public void onItemLongClick(View view, int position) {
-                            Toast.makeText(getActivity(), "长按", Toast.LENGTH_SHORT).show();
-                        }
-                    }));
-
+            final GridLayoutManager gridLayoutManager=new GridLayoutManager(getActivity(),2);
+            recy.setLayoutManager(gridLayoutManager);
             mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.girlFloatingActionButton);
             mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -85,12 +76,11 @@ public class GirlFragment extends Fragment {
 
                 }
             });
-
             gril_mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.gril_mSwipeRefreshLayout);
             gril_mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    request();
+                    request(a,isFirst);
                     gril_mSwipeRefreshLayout.setRefreshing(false);
                     recy.setAdapter(mAdapter = new GirlFragment.HomeAdapter());
                 }
@@ -104,10 +94,10 @@ public class GirlFragment extends Fragment {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    if (isSlideToBottom(recy)) {
-                        Toast.makeText(getActivity(), "滑到底部了", Toast.LENGTH_SHORT).show();
+                    if (isSlideToBottom(recy)){
+                        Toast.makeText(getActivity(),"滑到底部了", Toast.LENGTH_SHORT).show();
                         a++;
-                        request();
+                        request(a,false);
                     }
                 }
             });
@@ -116,24 +106,34 @@ public class GirlFragment extends Fragment {
         {
             view = View.inflate(getActivity(), R.layout.girl_fragment2, null);
         }
-
-
-
         return view;
     }
 
-    protected boolean isSlideToBottom(RecyclerView recyclerView) {
-        if (recy == null) return false;
-        if (recy.computeVerticalScrollExtent() + recy.computeVerticalScrollOffset() >= recy.computeVerticalScrollRange())
-            return true;
-        return false;
+    private void setAdapter(Boolean isFirst) {
+        if(isFirst){
+            mAdapter = new GirlFragment.HomeAdapter();
+            recy.setAdapter(mAdapter);
+        }else{
+            mAdapter.notifyDataSetChanged();
+        }
+        recy.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), recy,
+                new RecyclerViewClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(final View view, final int position) {
+                        startActivity(new Intent(getActivity(), Details_GileActivity.class));
+                        EventBus.getDefault().postSticky(new GrilFirstEvent(url.get(position).getUrl()));
+                    }
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        Toast.makeText(getActivity(), "长按", Toast.LENGTH_SHORT).show();
+                    }
+                }));
     }
-
-    public void request() {
+    public void request(int a,final  boolean isFirs) {
         OKHttp.getAsync(pa + a, new OKHttp.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
-
+                Log.i("ssssssss","kkkkkkk");
             }
 
             @Override
@@ -142,13 +142,18 @@ public class GirlFragment extends Fragment {
                 Gson gson = new Gson();
                 Gril gril = gson.fromJson(result, Gril.class);
                 url = gril.getResults();
-                recy.setAdapter(mAdapter = new GirlFragment.HomeAdapter());
+                urls.addAll(url);
+                setAdapter(isFirs);
             }
         });
     }
-
+    protected boolean isSlideToBottom(RecyclerView recyclerView) {
+        if (recy == null) return false;
+        if (recy.computeVerticalScrollExtent() + recy.computeVerticalScrollOffset() >= recy.computeVerticalScrollRange())
+            return true;
+        return false;
+    }
     class HomeAdapter extends RecyclerView.Adapter<GirlFragment.HomeAdapter.MyViewHolder> {
-
 
         @Override
         public GirlFragment.HomeAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -159,12 +164,12 @@ public class GirlFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(GirlFragment.HomeAdapter.MyViewHolder holder, int position) {
-            Glide.with(getActivity()).load(url.get(position).getUrl()).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(holder.im);
+            Glide.with(getActivity()).load(urls.get(position).getUrl()).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(holder.im);
         }
 
         @Override
         public int getItemCount() {
-            return url.size();
+            return urls.size();
         }
 
         public class MyViewHolder extends RecyclerView.ViewHolder {

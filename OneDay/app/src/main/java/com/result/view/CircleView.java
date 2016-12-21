@@ -10,9 +10,10 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * autour: 樊彦龙
- * date: 2016/12/16 18:19 
- * update: 2016/12/16
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 日期工具类
  */
 
 public class CircleView extends View {

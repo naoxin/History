@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.result.activity.DetailsActivity;
 import com.result.activity.R;
+import com.result.bean.FirstEvent;
 import com.result.bean.RecyclerViewClickListener;
 import com.result.dao.ScUser;
 import com.result.dao.ScUserDao;
@@ -24,10 +25,13 @@ import com.result.dao.ScUserDao;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
+
 /**
- * 1.作用
- * 2.作者：李延
- * 3.时间：2016、11、24
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 收藏页面
  */
 
 public class CollectionFragment extends Fragment {
@@ -42,42 +46,45 @@ public class CollectionFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = View.inflate(getActivity(), R.layout.collection_fragment,null);
+        view = View.inflate(getActivity(), R.layout.collection_fragment, null);
         lis = new ArrayList<ScUser>();
         dao = new ScUserDao(getActivity());
-        recy =(RecyclerView)view.findViewById(R.id.recy_collaps);
-        lis = dao.select();
-        adapter = new MyScAdapter();
-        recy.setLayoutManager(new LinearLayoutManager(getActivity()));// GridLayoutManager(getActivity(),2)
-        recy.setAdapter(adapter);
+        recy = (RecyclerView) view.findViewById(R.id.recy_collaps);
+        cha();
         recy.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), recy,
                 new RecyclerViewClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(final View view, final int position) {
                         startActivity(new Intent(getActivity(), DetailsActivity.class));
+                        EventBus.getDefault().postSticky(new FirstEvent(lis.get(position).getE_id()));
                     }
 
 
                     @Override
                     public void onItemLongClick(View view, int position) {
-                        dao.delete(position+1);
-                        adapter = new MyScAdapter();
-                        recy.setAdapter(adapter);
-                        Toast.makeText(getActivity(), position+"长按", Toast.LENGTH_SHORT).show();
+                        int id = lis.get(position).getId();
+                        dao.delete(id);
+                        cha();
+                        Toast.makeText(getActivity(), position + "删除", Toast.LENGTH_SHORT).show();
                     }
                 }));
         mSwipe = (SwipeRefreshLayout) view.findViewById(R.id.recy_swipe);
         mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                lis = dao.select();
-                adapter = new MyScAdapter();
+                cha();
                 mSwipe.setRefreshing(false);
             }
         });
         return view;
     }
 
+    public void cha() {
+        lis = dao.select();
+        adapter = new MyScAdapter();
+        recy.setLayoutManager(new LinearLayoutManager(getActivity()));// GridLayoutManager(getActivity(),2)
+        recy.setAdapter(adapter);
+    }
 
 
     class MyScAdapter extends RecyclerView.Adapter<MyScAdapter.MyViewHolder> {
@@ -103,7 +110,7 @@ public class CollectionFragment extends Fragment {
 
         class MyViewHolder extends RecyclerView.ViewHolder {
             TextView data;
-//            TextView title;
+            //            TextView title;
             ImageView image;
 
             public MyViewHolder(View itemView) {
@@ -113,5 +120,11 @@ public class CollectionFragment extends Fragment {
                 image = (ImageView) itemView.findViewById(R.id.coll_im);
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        cha();
     }
 }

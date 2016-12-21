@@ -7,9 +7,10 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * 1.作用：点击
- * 2.作者：李延
- * 3.时间：2016、11、24
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * RecyclerVie点击工具类
  */
 public class RecyclerViewClickListener implements RecyclerView.OnItemTouchListener {
     private GestureDetector mGestureDetector;

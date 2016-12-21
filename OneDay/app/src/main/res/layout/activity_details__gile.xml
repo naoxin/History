@@ -14,7 +14,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="#30469b"
         app:layout_scrollFlags="scroll|enterAlways" />
-    <ImageView
+    <uk.co.senab.photoview.PhotoView
         android:id="@+id/gril_im"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

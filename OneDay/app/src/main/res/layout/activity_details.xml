@@ -62,7 +62,7 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/Details_FloatingActionButton"
-        android:src="@mipmap/ic_calender"
+        android:src="@mipmap/ic_toolbar_like_n"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_anchor="@id/collapsing_toolbar_layout"

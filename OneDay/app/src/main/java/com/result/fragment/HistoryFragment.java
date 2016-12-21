@@ -31,6 +31,7 @@ import com.result.bean.FirstEvent;
 import com.result.bean.FirstEvent_Rili;
 import com.result.bean.OKHttp;
 import com.result.bean.RecyclerViewClickListener;
+import com.result.view.DateUtil;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -45,9 +46,10 @@ import static com.result.activity.R.id.xiangyou1;
 import static com.result.activity.R.id.xiangzuo1;
 
 /**
- * 1.作用
- * 2.作者：李延
- * 3.时间：2016、11、24
+ * autour: 李延
+ * date: 2016/12/21 20:34
+ * update: 2016/12/21
+ * 历史页面
  */
 
 public class HistoryFragment extends Fragment {
@@ -66,8 +68,7 @@ public class HistoryFragment extends Fragment {
     private SimpleDateFormat dateFormat;
     private Calendar mCalendar = Calendar.getInstance();//使用默认时区和语言环境获得一个日历。
     private List<Date.ResultBean> result1;
-    private int month;
-    private int day;
+
 
 
     @Nullable
@@ -109,7 +110,6 @@ public class HistoryFragment extends Fragment {
             mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    request(month,day);
                     mSwipe.setRefreshing(false);
                     mRecyclerView.setAdapter(mAdapter = new HomeAdapter(result1));
                 }
@@ -148,31 +148,45 @@ public class HistoryFragment extends Fragment {
         xiangzuo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //取当前日期的前一天.
-                mCalendar.add(Calendar.DAY_OF_MONTH, -1);
-                changeDate(mCalendar);
-//                notifyAll();
+//                //取当前日期的前一天.
+                result1.clear();
+                DateUtil.num = -1;
+                String dt1 = DateUtil.getDateStr(data.getText().toString(), DateUtil.num);
+                data.setText(dt1);
+                int month3 = Integer.parseInt(DateUtil.getMonth(dt1));
+                int day3 = Integer.parseInt(DateUtil.getMonthDate(dt1));
+                request(month3,day3);
             }
         });
+
         xiangyou.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //取当前日期的前一天.
-                mCalendar.add(Calendar.DAY_OF_MONTH, +1);
-                changeDate(mCalendar);
+//                //取当前日期的后一天.
+                result1.clear();
+                DateUtil.num = 1;
+                String dt1 = DateUtil.getDateStr(data.getText().toString(), DateUtil.num);
+                data.setText(dt1);
+                int month3 = Integer.parseInt(DateUtil.getMonth(dt1));
+                int day3 = Integer.parseInt(DateUtil.getMonthDate(dt1));
+                request(month3,day3);
             }
         });
+
     }
 
     private void changeDate(Calendar mCalendar) {
+
+
         //格式化日期
         dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        data.setText(dateFormat.format(mCalendar.getTime()));
+
         //获取月份，0表示1月份
-        month = mCalendar.get(Calendar.MONTH) + 1;
-        day = mCalendar.get(Calendar.DAY_OF_MONTH);
+        int year = mCalendar.get(Calendar.YEAR);
+        int month = mCalendar.get(Calendar.MONTH) + 1;
+        int day = mCalendar.get(Calendar.DAY_OF_MONTH);
+        data.setText(year + "年"+month + "月" +day + "日");
         Log.d("Data", month + day + "***999999999999");
-        Toast.makeText(getActivity(), month + "月" + day + "日", Toast.LENGTH_SHORT).show();
         request(month,day);
 
     }
@@ -236,10 +250,10 @@ public class HistoryFragment extends Fragment {
     }
     @Subscribe(sticky = true)
     public void onEventMainThread(FirstEvent_Rili event) {
-        month = event.getYear();
-        day = event.getDay();
+       int month = event.getYear();
+      int  day = event.getDay();
 //        month=+1;
-        data.setText("2016" + "-"+(month+1) + "-" +day );
+        data.setText("2016" + "年"+(month+1) + "月" +day+"日" );
         request(month+1,day);
     }
 
